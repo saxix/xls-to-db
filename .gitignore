@@ -1,0 +1,9 @@
+samples
+src/*.egg-info
+dist
+.eggs
+.cache
+samples
+.DS_Store
+.coverage
+xls.sqlite

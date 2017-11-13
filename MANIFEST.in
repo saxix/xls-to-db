@@ -1,0 +1,22 @@
+include README.rst
+include AUTHORS
+include CHANGES
+include LICENSE
+include MANIFEST.in
+include setup.py
+include tox.ini
+include *.py
+
+exclude Makefile
+exclude .editorconfig
+exclude .tx
+exclude .pyc
+
+recursive-exclude .tx *
+recursive-exclude __pycache__ *
+recursive-exclude . *.pyc
+
+recursive-include docs *
+recursive-include src/requirements *.pip
+recursive-include src/xls_to_db *.py
+recursive-include tests *
