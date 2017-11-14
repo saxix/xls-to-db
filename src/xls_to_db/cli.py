@@ -4,9 +4,54 @@ from __future__ import absolute_import
 import sys
 
 import click
+from click import Choice
 from pygments import formatters, highlight, lexers
 
 from .parser import Parser
+
+_global_options = [
+    click.option('--driver', default="sqlite3",
+                 type=Choice(["postgres", "mysql", "sqlite3"]),
+                 help="SQL syntax to use"),
+    click.option('--prefix', default="",
+                 help="prefix to prepend to each sheet name"),
+    click.option('--rows', default=100,
+                 metavar="NUM",
+                 help="number of row to use to get the data type"),
+    click.option('--sheet', default=None, type=int,
+                 metavar="SHEET",
+                 help="if provided only works on this sheet"),
+]
+
+_db_options = [
+    click.option('-h', '--host', default='localhost',
+                 metavar="HOST", help="database hostname/ip"),
+    click.option('-d', '--database', default=":memory:",
+                 metavar="DATABASE",
+                 help="database name"),
+    click.option('-u', '--username', metavar="USER", ),
+    click.option('-p', '--password', metavar="PASSWORD", )
+]
+
+
+def global_options(func):
+    for option in reversed(_global_options):
+        func = option(func)
+    return func
+
+
+def db_options(func):
+    for option in reversed(_db_options):
+        func = option(func)
+    return func
+
+
+def get_version():
+    try:
+        import pkg_resources  # part of setuptools
+        return pkg_resources.require("xls-to-db")[0].version
+    except:
+        return "UNKNOWN"
 
 
 def echo(sql, raw=False, lexer='sql'):
@@ -27,33 +72,30 @@ def echo(sql, raw=False, lexer='sql'):
     sys.stdout.flush()
 
 
-@click.command()
-@click.argument('xls', type=click.File('rb'))
-@click.option('--driver', default="sqlite3", )
-@click.option('--prefix', default="")
-@click.option('--plain', is_flag=True, default=False)
-@click.option('--drop', is_flag=True, default=False)
-@click.option('--sheet', default=None, type=int)
-@click.option('-l', '--single-line', is_flag=True, default=False)
-@click.option('--apply', is_flag=True, default=False)
-@click.option('--load', is_flag=True, default=False)
-@click.option('--rows', default=100)
-@click.option('-h', '--host', default='localhost')
-@click.option('-d', '--database', default=":memory:")
-@click.option('-u', '--username')
-@click.option('-p', '--password')
+@click.group(chain=True)
+@global_options
+@db_options
+@click.argument('xls', type=click.File('rb'), metavar="FILEPATH")
+@click.version_option(version=get_version())
 @click.pass_context
-def cli(ctx, xls, driver, plain, single_line, rows, prefix,
-        sheet,
-        drop, apply, load,
-        host, database, username, password):
+def cli(ctx, xls, driver, **kwargs):
+    """xls-to-db utility to work with xls and database"""
+    ctx.obj = {"xls": xls}
+
+
+@cli.command()
+@global_options
+@click.option('--plain', is_flag=True, default=False,
+              help="do not highlight text")
+@click.option('-l', '--single-line', is_flag=True, default=False,
+              help="dump sql in a signle line")
+@click.pass_context
+def sql(ctx, plain, single_line, driver, rows, prefix, sheet):
+    xls = ctx.obj["xls"]
     try:
-        if driver in ["pg", "postgres"]:
-            driver = "postgresql"
-        elif driver in ["sqlite", ]:
-            driver = "sqlite3"
         p = Parser(xls.name, driver, analyze_rows=rows, prefix=prefix)
-        p.set_connection(host, database, username, password)
+        ctx.obj["p"] = p
+
         if sheet:
             p.selection = range(sheet, sheet + 1)
 
@@ -62,10 +104,45 @@ def cli(ctx, xls, driver, plain, single_line, rows, prefix,
             sql = sql.replace(',', ',\n').replace('(', '(\n ', 1).replace(';', ';\n')
         echo(sql, plain)
 
-        if apply:
-            p.create_table()
+    except Exception as e:
+        click.echo(click.style(str(e), fg='red'), err=True)
 
-        if load:
-            p.load()
+
+@cli.command()
+@global_options
+@db_options
+@click.pass_context
+def create(ctx, driver, rows, prefix, sheet,
+          host, database, username, password):
+    try:
+        xls = ctx.obj["xls"]
+        if "p" not in ctx.obj:
+            p = Parser(xls.name, driver, analyze_rows=rows, prefix=prefix)
+            ctx.obj["p"] = p
+
+        ctx.obj['database'] = database
+        ctx.obj["p"].set_connection(host, database, username, password)
+        ctx.obj["p"].create_table()
+
+    except Exception as e:
+        click.echo(click.style(str(e), fg='red'), err=True)
+
+
+@cli.command()
+@global_options
+@db_options
+@click.pass_context
+def load(ctx, driver, rows, prefix, sheet,
+         host, username, password, database):
+    try:
+        xls = ctx.obj["xls"]
+        if "p" not in ctx.obj:
+            p = Parser(xls.name, driver, analyze_rows=rows, prefix=prefix)
+            ctx.obj["p"] = p
+        if "database" in ctx.obj:
+            database = ctx.obj["database"]
+
+        ctx.obj["p"].set_connection(host, database, username, password)
+        ctx.obj["p"].load()
     except Exception as e:
         click.echo(click.style(str(e), fg='red'), err=True)

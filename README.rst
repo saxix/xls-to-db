@@ -1,14 +1,14 @@
-XLS-To-Db
+XLS-to-DB
 =========
 
 Load data from xls/xlsx to database.
 
-Simple library and command line utility to load xls into database table.
+Simple library and command line utility to load xls/xlsx into database.
 
 Features
 --------
 
-- analyse xls/xlsx and creates related table
+- analyse xls/xlsx and creates (or dump the sql clause) related table
 - handle multiple sheet, creating one table per sheet
 - support mysql/postgres/sqlite
 - append/overwrite/update data
@@ -41,4 +41,8 @@ simply dump create clause::
 
 create table into database ::
 
-    $  xls-to-db samples/xls.xls --driver pg --user root -d xls
+    $  xls-to-db samples/xls.xls --driver pg --user root -d xls --apply
+
+create and load data ::
+
+    $  xls-to-db samples/xls.xls --driver pg --user root -d xls --apply --load

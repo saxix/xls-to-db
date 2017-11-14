@@ -3,7 +3,8 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import sys
-
+import tempfile
+import shutil
 import pytest
 
 here = os.path.realpath(os.path.dirname(__file__))
@@ -39,3 +40,13 @@ def database():
     yield DB
     if os.path.exists(DB):
         os.unlink(DB)
+
+
+@pytest.fixture
+def tmpdir():
+    curdir = os.curdir
+    dir = tempfile.mkdtemp(suffix = 'tmp', prefix = 'xls_to_tb')
+    os.chdir(dir)
+    yield os.path.realpath(os.path.abspath(dir))
+    os.chdir(curdir)
+    shutil.rmtree(dir)
