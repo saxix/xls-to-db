@@ -1,0 +1,30 @@
+language: python
+sudo: false
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+services:
+  - MySQL
+  - PostgreSQL
+
+
+install:
+  - pip install tox "coverage<=4.0" codecov
+
+script:
+  - tox -e "py${TRAVIS_PYTHON_VERSION//.}"
+
+before_success:
+  - coverage erase
+
+after_success:
+  - coverage combine
+  - codecov
