@@ -19,7 +19,7 @@ How to use it
 
 simply dump create clause::
 
-    $ xls-to-db my_xls.xls
+    $ xls-to-db my_xls.xls sql
     CREATE TABLE sheet1 (
      date DATE,
      time TIME,
@@ -41,8 +41,35 @@ simply dump create clause::
 
 create table into database ::
 
-    $  xls-to-db samples/xls.xls --driver pg --user root -d xls --apply
+    $  xls-to-db samples/xls.xls create --driver pg --user root -d xls
 
 create and load data ::
 
-    $  xls-to-db samples/xls.xls --driver pg --user root -d xls --apply --load
+    $  xls-to-db samples/xls.xls create --driver pg --user root -d xls load
+
+Help
+----
+
+ ::
+
+    Usage: xls-to-db [OPTIONS] FILEPATH COMMAND1 [ARGS]... [COMMAND2 [ARGS]...]...
+
+      xls-to-db utility to work with xls and database
+
+    Options:
+      --driver [postgres|mysql|sqlite3]
+                                      SQL syntax to use
+      --prefix TEXT                   prefix to prepend to each sheet name
+      --rows NUM                      number of row to use to get the data type
+      --sheet SHEET                   if provided only works on this sheet
+      -h, --host HOST                 database hostname/ip
+      -d, --database DATABASE         database name
+      -u, --username USER
+      -p, --password PASSWORD
+      --version                       Show the version and exit.
+      --help                          Show this message and exit.
+
+    Commands:
+      create
+      load
+      sql
