@@ -61,7 +61,7 @@ class Abstract(object):
         self._create()
         self.driver.execute('INSERT INTO test VALUES (%s)', [1])
         ret = self.driver.execute('SELECT * FROM test', fetch=True)
-        assert ret == [{"id": 1}]
+        assert list(ret) == [{"id": 1}]
 
     def test_exists(self):
         self._create()
@@ -85,7 +85,7 @@ class Abstract(object):
         self._create()
         self.driver.execute('INSERT INTO test VALUES (%s)', [1])
         ret = self.driver.execute('SELECT * FROM test', fetch=True)
-        assert ret == [{'id': 1}]
+        assert list(ret) == [{'id': 1}]
 
     def test_update(self):
         self.driver.execute('CREATE TABLE test (id INT, a INT, b INT)')
@@ -94,8 +94,8 @@ class Abstract(object):
 
         self.driver.update('test', [('a', 3), ('b', 5)], [("id", 2)])
         ret = self.driver.execute('SELECT * FROM test', fetch=True)
-        assert ret == [{u'a': 11, u'b': 12, u'id': 1},
-                       {u'a': 3, u'b': 5, u'id': 2}]
+        assert list(ret) == [{u'a': 11, u'b': 12, u'id': 1},
+                       {u'a': 3, u'b': 5, u'id': 2}], ret
 
     def test_update_all(self):
         self.driver.execute('CREATE TABLE test (id INT, a INT, b INT)')
@@ -104,5 +104,5 @@ class Abstract(object):
 
         self.driver.update('test', [('a', 0), ('b', 0)])
         ret = self.driver.execute('SELECT * FROM test', fetch=True)
-        assert ret == [{u'a': 0, u'b': 0, u'id': 1},
-                       {u'a': 0, u'b': 0, u'id': 2}]
+        assert list(ret) == [{u'a': 0, u'b': 0, u'id': 1},
+                       {u'a': 0, u'b': 0, u'id': 2}], ret

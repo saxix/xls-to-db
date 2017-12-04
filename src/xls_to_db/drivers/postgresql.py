@@ -3,13 +3,13 @@ from __future__ import absolute_import, unicode_literals
 
 from datetime import date, datetime, time
 from decimal import Decimal
-from time import struct_time
-from types import NoneType
 
 import psycopg2
 import psycopg2.extras
 from psycopg2._psycopg import ProgrammingError
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+from xls_to_db.compat import NoneType, long, unicode
 
 from .default import Driver as DefaultDriver
 
@@ -20,7 +20,6 @@ class Driver(DefaultDriver):
     MAPPING = {datetime: 'DATE',
                date: 'DATE',
                time: 'TIME',
-               struct_time: 'TIME',
                str: 'VARCHAR',
                unicode: 'VARCHAR',
                # text: 'TEXT',

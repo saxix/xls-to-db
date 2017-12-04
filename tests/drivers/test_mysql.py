@@ -11,5 +11,5 @@ from .ab import Abstract
 class TestMySql(Abstract, unittest.TestCase):
     pytestmark = pytest.mark.mysql
     _driver = xls_to_db.drivers.mysql.driver
-    PARAMS = ('localhost', 'xls', 'root', '',)
+    PARAMS = ('127.0.0.1', 'xls', 'root', '',)
     _CREATE_DB = "CREATE DATABASE IF NOT EXISTS {};".format(Abstract.DATABASE)

@@ -1,7 +1,20 @@
+attrs==17.3.0             # via pytest
+coverage==4.4.2           # via pytest-cov
+et-xmlfile==1.0.1
+funcsigs==1.0.2           # via pytest
+jdcal==1.3
 lml==0.0.1
-pyexcel-io==0.5.3
+openpyxl==2.4.9
+pluggy==0.6.0             # via pytest
+py==1.5.2                 # via pytest
+pyexcel-io==0.5.4
 pyexcel-xls==0.5.4
 pyexcel==0.5.6
+pytest-cov==2.5.1         # via pytest-cover
+pytest-cover==3.0.0       # via pytest-coverage
+pytest-coverage==0.0
+pytest-echo==1.4
+pytest==3.3.0
 python-dateutil==2.6.1
 six==1.11.0
 texttable==1.1.1

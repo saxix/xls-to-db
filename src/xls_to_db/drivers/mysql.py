@@ -1,19 +1,24 @@
 # # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
-import pymysql
-from pymysql.cursors import DictCursor
+try:
+    import MySQLdb as mysql
+    from MySQLdb.cursors import DictCursor
+except ImportError:
+    import pymysql as mysql
+    from pymysql.cursors import DictCursor
 
 from .default import Driver as DefaultDriver
 
 
 class Driver(DefaultDriver):
     def _connect(self):
-        conn = pymysql.connect(
+        conn = mysql.connect(
             host=self.host,
             user=self.username,
             passwd=self.password,
             connect_timeout=5,
+            port=self.port or 3306,
             cursorclass=DictCursor,
             use_unicode=True,
             charset="utf8")

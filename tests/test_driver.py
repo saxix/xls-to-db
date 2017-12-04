@@ -4,10 +4,10 @@ from __future__ import absolute_import
 import os
 
 import psycopg2
-import pymysql
 import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
+from xls_to_db.drivers.mysql import mysql
 from xls_to_db.parser import Parser
 
 BASE = os.path.realpath(os.path.dirname(__file__))
@@ -15,8 +15,10 @@ DATABASE = 'xls'
 
 
 def setup_module():
-    conn = pymysql.connect(
-        host='localhost',
+    conn = mysql.connect(
+        host='127.0.0.1',
+        port=3306,
+        db='sys',
         user='root',
         passwd='')
     cur = conn.cursor()
@@ -33,8 +35,8 @@ def setup_module():
 
 
 def teardown_module():
-    conn = pymysql.connect(
-        host='localhost',
+    conn = mysql.connect(
+        host='127.0.0.1',
         user='root',
         passwd='')
     cur = conn.cursor()
@@ -53,7 +55,7 @@ def teardown_module():
 def test_driver_xls(driver):
     target = os.path.join(BASE, 'xls.xls')
     p = Parser(target, driver=driver, prefix="test_")
-    p.set_connection('localhost', 'xls', 'root', '')
+    p.set_connection('127.0.0.1', 'xls', 'root', '')
 
     p.create_table(skip_if_exists=True)
     p.load()
@@ -65,7 +67,7 @@ def test_driver_xls(driver):
 def test_driver_xlsx(driver):
     target = os.path.join(BASE, 'xls.xlsx')
     p = Parser(target, driver=driver, prefix="test_")
-    p.set_connection('localhost', 'xls', 'root', '')
+    p.set_connection('127.0.0.1', 'xls', 'root', '')
 
     p.create_table(skip_if_exists=True)
     p.load()
@@ -77,7 +79,7 @@ def test_driver_xlsx(driver):
 def test_driver_csv(driver):
     target = os.path.join(BASE, 'xls.csv')
     p = Parser(target, driver=driver, prefix="test_")
-    p.set_connection('localhost', 'xls', 'root', '')
+    p.set_connection('127.0.0.1', 'xls', 'root', '')
     p.create_table(skip_if_exists=True)
     p.load()
     r = next(p.dump())

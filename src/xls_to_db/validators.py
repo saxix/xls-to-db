@@ -5,6 +5,8 @@ import re
 import time
 
 from datetime import datetime
+
+import unicodedata
 from dateutil.parser import parse
 from decimal import Decimal
 import locale
@@ -24,7 +26,7 @@ for l in locales:
     else:
         conv = locale.localeconv()
         CODES.append(conv['int_curr_symbol'].strip())
-        SYMBOLS.append(conv['currency_symbol'].decode('utf8').replace('$', r'\$'))
+        SYMBOLS.append(unicodedata.normalize('NFKD', conv['currency_symbol']).replace('$', r'\$'))
 
 
 EMPTY_VALUES = (None, '', [], (), {})

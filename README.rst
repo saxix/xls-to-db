@@ -17,6 +17,17 @@ Features
 How to use it
 -------------
 
+Install
+~~~~~~~
+
+Install command line with PostgreSQL and MySQL support
+
+    $ pip install xls-to-db[cli,postgres,mysql]
+
+
+Use
+~~~
+
 simply dump create clause::
 
     $ xls-to-db my_xls.xls sql

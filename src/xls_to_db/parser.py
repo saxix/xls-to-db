@@ -4,16 +4,15 @@ from __future__ import absolute_import
 import logging
 import os
 import unicodedata
-from StringIO import StringIO
+
 from collections import namedtuple
 from datetime import date, datetime, time
 from decimal import Decimal
 from time import struct_time
-from types import NoneType
 
 import pyexcel as p
-from xlrd import XLRDError
 
+from .compat import NoneType, StringIO, long, unicode
 from .exceptions import InvalidFieldNameError, InsertError, UnsupportedFileError
 from .utils import import_by_name
 from .validators import is_integer, parse_bool, parse_date, parse_time, parse_number, parse_currency

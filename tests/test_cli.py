@@ -5,12 +5,13 @@ import os
 import re
 import sqlite3
 from contextlib import contextmanager
-from StringIO import StringIO
 
 import pytest
 from click.testing import CliRunner
 
+from xls_to_db.compat import StringIO
 from xls_to_db.cli import cli, echo
+
 
 ansi_escape = re.compile(r'\x1b[^m]*m')
 
@@ -26,11 +27,11 @@ def temp_environ(**kwargs):
 
 
 @pytest.fixture()
-def runner(mocker, ):
+def runner(monkeypatch):
     runner = CliRunner(echo_stdin=True)
-    mocker.patch('click.confirm', return_value='y')
-    mocker.patch('click.prompt', lambda prompt, default: default or "<value>")
-    mocker.patch('click.core.Option.prompt_for_value', return_value='')
+    monkeypatch.setattr('click.confirm', lambda *k : 'y')
+    monkeypatch.setattr('click.prompt', lambda prompt, default: default or "<value>")
+    monkeypatch.setattr('click.core.Option.prompt_for_value', lambda *k: '')
     return runner
 
 

@@ -3,10 +3,8 @@ from __future__ import absolute_import, unicode_literals
 
 from datetime import date, datetime, time
 from decimal import Decimal
-from time import struct_time
-from types import NoneType
 
-import sys
+from xls_to_db.compat import NoneType, long, unicode
 
 
 class Driver(object):
@@ -21,7 +19,6 @@ class Driver(object):
     MAPPING = {datetime: 'DATETIME',
                date: 'DATE',
                time: 'TIME',
-               struct_time: 'TIME',
                str: 'VARCHAR',
                unicode: 'VARCHAR',
                int: 'BIGINT',
@@ -37,12 +34,14 @@ class Driver(object):
         self.dbname = None
         self.username = None
         self.password = None
+        self.port = None
 
-    def set_params(self, host, dbname, username, password):
+    def set_params(self, host, dbname, username, password, port=None):
         self.host = host
         self.dbname = dbname
         self.username = username
         self.password = password
+        self.port = port
 
     def get_create(self, table, field_defs, sep=", "):
         return "CREATE TABLE {table} ({fields})".format(table=table,
@@ -70,10 +69,10 @@ class Driver(object):
             raise
             # a,b,c = sys.exc_info()
             # raise a, """Error executing query:
-# Sql:{}
-# Params: {}
-# Error: {}
-#             """.format(sql, params, e), c
+        # Sql:{}
+        # Params: {}
+        # Error: {}
+        #             """.format(sql, params, e), c
         finally:
             conn.close()
 

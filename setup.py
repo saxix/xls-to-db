@@ -34,8 +34,10 @@ setup(name='xls-to-db',
       tests_require=dev_requires,
       extras_require={
           'dev': dev_requires,
+          'postgres': ["psycopg2"],
+          'mysql': ["mysqlclient"],
           'tests': test_requires,
-          'cli': ['click==6.7',],
+          'cli': ['click==6.7', 'pygments'],
       },
       entry_points={
           'console_scripts': [

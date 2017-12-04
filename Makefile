@@ -1,3 +1,8 @@
+develop:
+	pip install -r src/requirements/develop.pip
+
+test:
+	pytest tests
 
 clean:
 	@rm -fr dist/ ~build
