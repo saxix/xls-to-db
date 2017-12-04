@@ -73,3 +73,53 @@ Help
       create
       load
       sql
+
+
+Internal API
+------------
+
+::
+
+    Parser.set_connection()
+    Parser.analyze()
+    Parser.get_clauses()
+
+    Parser.truncate()
+    Parser.drop()
+    Parser.update()
+    Parser.append()
+    Parser.create_table()
+
+
+Create
+
+::
+
+    from xls_to_db.parser import Parser
+
+    p = Parser(target, driver="postgresql", prefix="test_")
+    p.set_connection('HOST', 'DATABSE', 'USERNAME', 'PASSWORD')
+    p.create_table()
+
+
+is equivalent to::
+
+    xls-to-db samples/xls.xls create --driver pg --user root -d xls
+
+
+Create and load
+
+::
+
+    from xls_to_db.parser import Parser
+
+    p = Parser(target, driver="postgresql", prefix="test_")
+    p.set_connection('HOST', 'DATABSE', 'USERNAME', 'PASSWORD')
+    p.create_table()
+    p.load()
+
+
+is equivalent to::
+
+    xls-to-db samples/xls.xls create --driver pg --user root -d xls load
+

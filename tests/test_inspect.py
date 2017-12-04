@@ -47,3 +47,17 @@ def test_pg(f):
         ['date DATE', 'time TIME', 'datetime DATE', 'char_3 VARCHAR(4)', 'int_4 BIGINT', 'field_0 BIGINT',
          'float_6 FLOAT', 'currency FLOAT', 'percentage DOUBLE PRECISION', 'fraction DOUBLE PRECISION',
          'cap BIGINT', 'empty VARCHAR(5)', 'aeiou BIGINT', 'bool BIGINT', 'formula FLOAT'], ['date DATE']]
+
+
+@pytest.mark.parametrize("f", ['xls.csv'])
+def test_csv(f):
+    target = os.path.join(BASE, f)
+    p = Parser(target, driver="postgresql", prefix="test_")
+
+    assert p.field_defs == [
+        ['date DATE', 'time DATE', 'datetime DATE', 'char_3 VARCHAR(4)', 'int_4 BIGINT', 'field_0 BIGINT',
+         'float_6 FLOAT', 'currency FLOAT',
+         'percentage VARCHAR(10)', 'fraction VARCHAR(8)',
+         'cap BIGINT',
+         'empty VARCHAR(5)',
+         'aeiou BIGINT', 'bool BOOLEAN']]

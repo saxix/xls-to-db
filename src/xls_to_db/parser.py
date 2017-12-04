@@ -8,6 +8,7 @@ from StringIO import StringIO
 from collections import namedtuple
 from datetime import date, datetime, time
 from decimal import Decimal
+from time import struct_time
 from types import NoneType
 
 import pyexcel as p
@@ -15,7 +16,7 @@ from xlrd import XLRDError
 
 from .exceptions import InvalidFieldNameError, InsertError, UnsupportedFileError
 from .utils import import_by_name
-from .validators import is_integer
+from .validators import is_integer, parse_bool, parse_date, parse_time, parse_number, parse_currency
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,14 @@ def normalize_field_name(value):
 def validate_field_name(value):
     if is_integer(str(value)):
         raise InvalidFieldNameError(value)
+
+
+CSV = object()
+
+
+class CSVColumnInspector(object):
+    def __getitem__(self, item):
+        return CSV
 
 
 class Wrapper(object):
@@ -77,15 +86,41 @@ class Wrapper(object):
                 for col, cells in enumerate(sheet.columns):
                     cell = cells[1]
                     self.formats[i][col] = cell.number_format
+        elif extension == '.csv':
+            self.formats[0] = CSVColumnInspector()
         else:
-            pass  # pragma: no cover
+            raise Exception('File format not supported')  # pragma: no cover
 
 
-ORDER = (None, NoneType, int, long, float, Decimal,
-         date, time, datetime, str, unicode)
+ORDER = (None, NoneType, bool, int, long, float, Decimal,
+         date, time, struct_time, datetime, str, unicode)
+
+
+def csv_inspect_column(values):
+    data_type = None
+    cast = lambda x: x
+    cleaned = []
+    for v in values:
+        for cast in [parse_bool, parse_currency, parse_number, parse_time, parse_date, str, unicode]:
+            try:
+                cleaned.append(cast(v))
+                break
+            except:
+                pass
+    for value in cleaned:
+        current = type(value)
+        if ORDER.index(current) > ORDER.index(data_type):
+            data_type = current
+    return data_type, cast
 
 
 def inspect_column(values, fmt):
+    if fmt is CSV:
+        return csv_inspect_column(values)
+    else:
+        return xls_inspect_column(values, fmt)
+
+def xls_inspect_column(values, fmt):
     data_type = str
     cast = lambda x: x
     try:
@@ -124,17 +159,20 @@ def _max(serie):
 class Parser(object):
     def __init__(self, filename, driver="sqlite3", file_content=None,
                  analyze_rows=100, headers=True, prefix=""):
-        try:
-            if file_content:
-                name, extension = os.path.splitext(filename)
-                self.book = p.get_book(file_type=extension[1:],
-                                       file_content=file_content)
-                self.F = Wrapper(filename, file_content=file_content)
-            else:
-                self.book = p.get_book(file_name=filename)
-                self.F = Wrapper(filename, None)
-        except XLRDError as e:
-            raise UnsupportedFileError("Error reading `{}`: {}".format(filename, e))
+        name, extension = os.path.splitext(filename)
+        if extension not in ['.csv', '.xls', '.xlsx']:
+            raise UnsupportedFileError("Error reading `{}`: {}".format(filename, extension))
+
+        if file_content:
+            self.book = p.get_book(file_type=extension[1:],
+                                   file_content=file_content)
+            self.F = Wrapper(filename, file_content=file_content)
+        else:
+            self.book = p.get_book(file_name=filename)
+            self.F = Wrapper(filename, None)
+
+        self.filename = filename
+        self.file_type = extension[1:]
         self.analyze_rows = analyze_rows
         self.headers = headers
         self.driver = import_by_name("xls_to_db.drivers.%s.driver" % driver)
@@ -151,6 +189,7 @@ class Parser(object):
 
         self.varchar_min = 0
         self.varchar_empty = 10
+        self.casters = []
 
     @property
     def selection(self):
@@ -173,7 +212,7 @@ class Parser(object):
         for i in range(self.book.number_of_sheets()):
             self.struct.append([])
             sheet = self.book.sheet_by_index(i)
-            self._names.append(normalize_table_name("{}{}".format(self.prefix, sheet.name)))
+            self._names.append(normalize_table_name("{}{}".format(self.prefix, sheet.name.replace('.', '_'))))
             for col_idx in range(sheet.number_of_columns()):
                 col = sheet.column_at(col_idx)
                 values = col[1:self.analyze_rows + 1] or [0]
@@ -281,6 +320,12 @@ class Parser(object):
                 raise
             return
 
+
+    def cast_row_values(self, sheet, row):
+        for i, v in enumerate(row):
+            row[i] = self.struct[sheet][i].cast(v)
+        return row
+
     def append(self):
         for i in self.selection:
             try:
@@ -289,11 +334,13 @@ class Parser(object):
                 params = ['%s'] * sheet.number_of_columns()
                 insert = r"INSERT INTO {table} VALUES ({params});".format(table=table,
                                                                           params=", ".join(params))
+
                 for row_idx in range(sheet.number_of_rows()):
                     if row_idx == 0:
                         continue
                     try:
                         row = sheet.row_at(row_idx)
+                        self.cast_row_values(i, row)
                         self.driver.execute(insert, row, fetch=False)
                     except Exception as e:
                         msg = """Error insert line {} of sheet {} ({})

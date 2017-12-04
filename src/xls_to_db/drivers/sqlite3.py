@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import sqlite3
 from datetime import date, datetime, time
 from decimal import Decimal
+from time import struct_time
 from types import NoneType
 
 from .default import Driver as DefaultDriver
@@ -22,6 +23,7 @@ class Driver(DefaultDriver):
     MAPPING = {datetime: 'DATE',
                date: 'DATE',
                time: 'TIME',
+               struct_time: 'TIME',
                str: 'VARCHAR',
                unicode: 'VARCHAR',
                int: 'BIGINT',

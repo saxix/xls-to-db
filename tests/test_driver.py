@@ -22,15 +22,14 @@ def setup_module():
     cur = conn.cursor()
     cur.execute("DROP DATABASE IF EXISTS {};".format(DATABASE))
     cur.execute("CREATE DATABASE {};".format(DATABASE))
+    conn.commit()
 
     conn = psycopg2.connect("host='localhost' user='root' dbname='postgres'")
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cur = conn.cursor()
-    try:
-        cur.execute("DROP DATABASE IF EXISTS {};".format(DATABASE))
-        cur.execute("CREATE DATABASE {};".format(DATABASE))
-    except:
-        pass
+    cur.execute("DROP DATABASE IF EXISTS {};".format(DATABASE))
+    cur.execute("CREATE DATABASE {};".format(DATABASE))
+    conn.commit()
 
 
 def teardown_module():
@@ -46,7 +45,8 @@ def teardown_module():
     cur = conn.cursor()
     cur.execute("DROP DATABASE IF EXISTS {};".format(DATABASE))
 
-    os.unlink(DATABASE)
+    if os.path.exists(DATABASE):
+        os.unlink(DATABASE)
 
 
 @pytest.mark.parametrize("driver", ["mysql", "sqlite3", "postgresql"])
@@ -67,6 +67,17 @@ def test_driver_xlsx(driver):
     p = Parser(target, driver=driver, prefix="test_")
     p.set_connection('localhost', 'xls', 'root', '')
 
+    p.create_table(skip_if_exists=True)
+    p.load()
+    r = next(p.dump())
+    assert r
+
+
+@pytest.mark.parametrize("driver", ["mysql", "sqlite3", "postgresql"])
+def test_driver_csv(driver):
+    target = os.path.join(BASE, 'xls.csv')
+    p = Parser(target, driver=driver, prefix="test_")
+    p.set_connection('localhost', 'xls', 'root', '')
     p.create_table(skip_if_exists=True)
     p.load()
     r = next(p.dump())

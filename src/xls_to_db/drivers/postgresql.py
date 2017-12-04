@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 
 from datetime import date, datetime, time
 from decimal import Decimal
+from time import struct_time
 from types import NoneType
 
 import psycopg2
@@ -19,6 +20,7 @@ class Driver(DefaultDriver):
     MAPPING = {datetime: 'DATE',
                date: 'DATE',
                time: 'TIME',
+               struct_time: 'TIME',
                str: 'VARCHAR',
                unicode: 'VARCHAR',
                # text: 'TEXT',

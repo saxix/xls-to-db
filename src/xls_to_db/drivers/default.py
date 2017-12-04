@@ -3,7 +3,10 @@ from __future__ import absolute_import, unicode_literals
 
 from datetime import date, datetime, time
 from decimal import Decimal
+from time import struct_time
 from types import NoneType
+
+import sys
 
 
 class Driver(object):
@@ -18,6 +21,7 @@ class Driver(object):
     MAPPING = {datetime: 'DATETIME',
                date: 'DATE',
                time: 'TIME',
+               struct_time: 'TIME',
                str: 'VARCHAR',
                unicode: 'VARCHAR',
                int: 'BIGINT',
@@ -62,13 +66,14 @@ class Driver(object):
             conn.commit()
             if fetch:
                 return cur.fetchall()
-        except Exception:
+        except Exception as e:
             raise
-            # raise Exception("""Error executing query:
-        # Sql:{}
-        # Params: {}
-        # Error: {}
-        #             """.format(sql, params, e))
+            # a,b,c = sys.exc_info()
+            # raise a, """Error executing query:
+# Sql:{}
+# Params: {}
+# Error: {}
+#             """.format(sql, params, e), c
         finally:
             conn.close()
 

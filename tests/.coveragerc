@@ -1,9 +1,8 @@
 [run]
 branch = True
 source = xls_to_db
-
 omit = src/xls_to_db/__init__.py
-        tests/**
+       tests/**
 
 [report]
 # Regexes for lines to exclude from consideration

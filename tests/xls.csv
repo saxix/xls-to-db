@@ -1,0 +1,2 @@
+date,time,datetime,char,Int,,float,currency,percentage,fraction,CAP,empty,àèîôû,bool
+"Tuesday, 19 Jul 1966",17:00:00,09 Apr 1900 00:00,char,10,-10,10.6,€10,00%, 1/4,144,,6,TRUE

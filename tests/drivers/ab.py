@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-
-import logging
-# import unittest
-
 import pytest
 import time
 
-logger = logging.getLogger(__name__)
-
 
 class Abstract(object):
+    pytestmark = []
     _driver = None
     PARAMS = None
     DATABASE = 'xls'

@@ -45,7 +45,7 @@ def database():
 @pytest.fixture
 def tmpdir():
     curdir = os.curdir
-    dir = tempfile.mkdtemp(suffix = 'tmp', prefix = 'xls_to_tb')
+    dir = tempfile.mkdtemp(suffix='tmp', prefix='xls_to_tb')
     os.chdir(dir)
     yield os.path.realpath(os.path.abspath(dir))
     os.chdir(curdir)
